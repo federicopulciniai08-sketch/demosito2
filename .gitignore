@@ -1,0 +1,8 @@
+# Configurazioni locali e segreti: mai nel repository
+.vercel
+.env
+.env.*
+*.env
+.claude/settings.local.json
+.impeccable/
+*.log

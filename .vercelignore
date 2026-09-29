@@ -1,0 +1,13 @@
+# Mai pubblicare configurazioni locali o segreti
+.claude
+.vercel
+.impeccable
+.env
+.env.*
+*.env
+.gitignore
+.vercelignore
+*.md
+*.ps1
+*.py
+*.log
