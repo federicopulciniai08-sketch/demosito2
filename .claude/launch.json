@@ -4,7 +4,7 @@
     {
       "name": "angolo",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "5520"],
+      "runtimeArgs": ["src/serve.py", "5520"],
       "port": 5520
     }
   ]

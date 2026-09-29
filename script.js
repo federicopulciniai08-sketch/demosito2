@@ -23,20 +23,6 @@ const CONFIG = {
   },
 };
 
-// Colori dei palloncini proposti nel compositore
-const COLORI = {
-  coral: { nome: 'Corallo', l: '#FFB0A3', b: '#FF6F5E', d: '#D94430' },
-  blush: { nome: 'Rosa cipria', l: '#FFE3DD', b: '#FFB8AC', d: '#EE8C7A' },
-  sun: { nome: 'Giallo sole', l: '#FFEBAE', b: '#FFC940', d: '#E29E12' },
-  butter: { nome: 'Burro', l: '#FFF6D6', b: '#FFE7A0', d: '#EDC65A' },
-  sky: { nome: 'Azzurro', l: '#CDEEFC', b: '#7CCBF0', d: '#3E9FD0' },
-  azure: { nome: 'Blu mare', l: '#9FD3F2', b: '#3A9BD5', d: '#1F74AE' },
-  pearl: { nome: 'Perla', l: '#FFFFFF', b: '#EEF1F6', d: '#BFCAD9' },
-  gold: { nome: 'Oro', l: '#FFF3C4', b: '#F7C948', d: '#C98A0B' },
-  sage: { nome: 'Salvia', l: '#E0EEDC', b: '#A9C9A4', d: '#769E73' },
-  lilac: { nome: 'Lilla', l: '#EDE4FF', b: '#C9B6F2', d: '#9A80D6' },
-};
-const PALETTE_START = ['coral', 'gold', 'pearl'];
 
 /* ---------------------------------------------------------
    Utilità
@@ -149,16 +135,15 @@ function splitWords() {
 }
 
 /* ---------------------------------------------------------
-   Apertura: l'allestimento si monta pezzo per pezzo
+   Apertura della pagina: titolo parola per parola, poi il resto
    --------------------------------------------------------- */
-function initHero() {
-  const hero = $('.hero');
-  if (!hero) return;
-  $$('[data-hero-in]').forEach((el, i) => el.style.setProperty('--d', i));
+function initIntro() {
+  const intro = $('[data-intro]');
+  if (!intro) return;
+  $$('[data-hero-in]', intro).forEach((el, i) => el.style.setProperty('--d', i));
   const go = () => {
-    hero.classList.add('is-ready');
-    const h1 = $('.hero [data-split]');
-    if (h1) h1.classList.add('is-in');
+    intro.classList.add('is-ready');
+    $$('[data-split]', intro).forEach((h) => h.classList.add('is-in'));
   };
   // aspetta i caratteri (max 600 ms) così il titolo non cambia forma a metà animazione
   const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
@@ -264,8 +249,8 @@ function initRibbons() {
     const W = layer.clientWidth;
     H = layer.clientHeight;
     if (!W || !H) return;
-    const hero = $('.hero');
-    const start = hero ? hero.offsetHeight * 0.62 : 0;
+    const intro = $('[data-intro]');
+    const start = intro ? Math.min(intro.offsetHeight * 0.62, 560) : 0;
     const mobile = W < 700;
     // i nastri restano nel margine: mai sotto i testi (il contrasto del testo non cambia)
     const wrap = $('.section .wrap');
@@ -380,28 +365,15 @@ function initChrome() {
 
   if (!('IntersectionObserver' in window)) return;
 
-  // voce di menu della sezione in vista
-  const links = new Map($$('.nav-list a').map((a) => [a.getAttribute('href').slice(1), a]));
-  const secIo = new IntersectionObserver((entries) => {
-    entries.forEach((en) => {
-      const a = links.get(en.target.id);
-      if (a && en.isIntersecting) {
-        links.forEach((l) => { l.classList.remove('is-current'); l.removeAttribute('aria-current'); });
-        a.classList.add('is-current');
-        a.setAttribute('aria-current', 'true');
-      }
-    });
-  }, { rootMargin: '-45% 0px -50% 0px' });
-  links.forEach((_, id) => { const s = document.getElementById(id); if (s) secIo.observe(s); });
-
-  // barra con Chiama / WhatsApp su mobile: compare dopo l'apertura, sparisce su preventivo e contatti
+  // barra con Chiama / WhatsApp su mobile: compare dopo l'apertura della pagina,
+  // sparisce dove i contatti sono già in vista (contatti, modulo, pedice)
   const bar = $('[data-mbar]');
-  const heroCta = $('[data-hero-cta]');
-  const hide = [$('#preventivo'), $('#contatti'), $('.site-footer')].filter(Boolean);
-  if (!bar || !heroCta) return;
+  const intro = $('[data-intro]');
+  const hide = $$('.visit, .contact, #preventivo, .cta-band, .site-footer');
+  if (!bar || !intro) return;
   const seen = new Map();
   const update = () => {
-    const show = seen.get(heroCta) === false && !hide.some((el) => seen.get(el));
+    const show = seen.get(intro) === false && !hide.some((el) => seen.get(el));
     bar.classList.toggle('is-visible', show);
     bar.setAttribute('aria-hidden', String(!show));
     $$('a', bar).forEach((a) => { a.tabIndex = show ? 0 : -1; });
@@ -410,95 +382,22 @@ function initChrome() {
     entries.forEach((en) => seen.set(en.target, en.isIntersecting));
     update();
   });
-  [heroCta, ...hide].forEach((el) => io.observe(el));
+  [intro, ...hide].forEach((el) => io.observe(el));
 }
 
 /* ---------------------------------------------------------
-   Componi la festa: palette, bouquet dal vivo, messaggio WhatsApp
+   Componi la festa: messaggio WhatsApp già scritto
    --------------------------------------------------------- */
 function initComposer() {
   const form = $('[data-composer]');
   if (!form) return;
-  const swatchBox = $('[data-swatches]');
-  const preview = $('[data-preview]');
-  // segno di spunta costruito via DOM (niente innerHTML: compatibile con Trusted Types)
-  const makeCheck = () => {
-    const NS = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('aria-hidden', 'true');
-    const path = document.createElementNS(NS, 'path');
-    [['d', 'M20 6 9 17l-5-5'], ['fill', 'none'], ['stroke', 'currentColor'], ['stroke-width', '3'], ['stroke-linecap', 'round'], ['stroke-linejoin', 'round']].forEach(([k, v]) => path.setAttribute(k, v));
-    svg.append(path);
-    return svg;
-  };
-  let chosen = [...PALETTE_START];
 
-  Object.entries(COLORI).forEach(([key, c]) => {
-    const label = document.createElement('label');
-    label.className = 'swatch';
-    const input = document.createElement('input');
-    input.type = 'checkbox';
-    input.name = 'colori';
-    input.value = key;
-    const ball = document.createElement('span');
-    ball.className = 'swatch-ball';
-    ball.style.setProperty('--l', c.l);
-    ball.style.setProperty('--b', c.b);
-    ball.style.setProperty('--d', c.d);
-    ball.append(makeCheck());
-    const name = document.createElement('span');
-    name.className = 'swatch-name';
-    name.textContent = c.nome;
-    label.append(input, ball, name);
-    swatchBox.append(label);
-  });
-  const live = document.createElement('p');
-  live.className = 'sr-only';
-  live.setAttribute('aria-live', 'polite');
-  swatchBox.after(live);
-
-  const paint = (popSlots = [1, 2, 3]) => {
-    const pal = chosen.length ? chosen : PALETTE_START;
-    [1, 2, 3].forEach((slot) => {
-      const c = COLORI[pal[(slot - 1) % pal.length]];
-      preview.style.setProperty(`--c${slot}-l`, c.l);
-      preview.style.setProperty(`--c${slot}-b`, c.b);
-      preview.style.setProperty(`--c${slot}-d`, c.d);
-    });
-    if (reduceMotion) return;
-    $$('.pv-bal', preview).forEach((g) => {
-      const slot = Number([...g.classList].find((k) => /^pv-s\d$/.test(k)).slice(4));
-      if (!popSlots.includes(slot)) return;
-      g.classList.remove('is-pop');
-      void g.getBoundingClientRect();
-      g.classList.add('is-pop');
-    });
-  };
-  const syncInputs = () => {
-    $$('input[name="colori"]', swatchBox).forEach((i) => { i.checked = chosen.includes(i.value); });
-  };
-  swatchBox.addEventListener('change', (e) => {
-    const i = e.target;
-    if (i.name !== 'colori') return;
-    let msg = '';
-    if (i.checked) {
-      chosen.push(i.value);
-      if (chosen.length > 3) {
-        const out = chosen.shift();
-        msg = `${COLORI[i.value].nome} al posto di ${COLORI[out].nome}.`;
-      } else msg = `${COLORI[i.value].nome} aggiunto.`;
-    } else {
-      chosen = chosen.filter((k) => k !== i.value);
-      msg = `${COLORI[i.value].nome} tolto.`;
-    }
-    syncInputs();
-    live.textContent = `${msg} Colori scelti: ${chosen.map((k) => COLORI[k].nome).join(', ') || 'nessuno'}.`;
-    const idx = chosen.indexOf(i.value);
-    paint(idx >= 0 ? [idx + 1] : [1, 2, 3]);
-  });
-  syncInputs();
-  paint([]);
+  // dal catalogo si arriva con l'occasione già scelta (es. contatti?festa=Battesimo)
+  const festa = new URLSearchParams(window.location.search).get('festa');
+  if (festa) {
+    const radio = $$('input[name="occasione"]', form).find((i) => i.value === festa);
+    if (radio) radio.checked = true;
+  }
 
   // messaggio
   const fieldError = (name) => $(`[data-error-for="${name}"]`, form);
@@ -529,7 +428,6 @@ function initComposer() {
     if (fd.get('invitati')) righe.push(`Invitati: ${fd.get('invitati').toString().toLowerCase()}`);
     const servizi = fd.getAll('servizi');
     if (servizi.length) righe.push(`Mi servono: ${servizi.join(', ')}`);
-    if (chosen.length) righe.push(`Colori dei palloncini: ${chosen.map((k) => COLORI[k].nome.toLowerCase()).join(', ')}`);
     const note = (fd.get('note') || '').toString().trim();
     if (note) righe.push(`Note: ${note}`);
     righe.push('Grazie!');
@@ -543,16 +441,6 @@ function initComposer() {
   form.addEventListener('input', refreshMail);
   form.addEventListener('change', refreshMail);
   refreshMail();
-
-  // dalle schede delle occasioni al preventivo, con l'occasione già scelta
-  $$('[data-prefill]').forEach((a) => {
-    a.addEventListener('click', () => {
-      const occ = $(`input[name="occasione"][value="${a.dataset.prefill}"]`, form);
-      if (occ) occ.checked = true;
-      clearError('occasione');
-      refreshMail();
-    });
-  });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -602,7 +490,7 @@ applyConfig();
 renderStatus();
 renderHours();
 splitWords();
-initHero();
+initIntro();
 initSetup();
 initRibbons();
 initReveal();

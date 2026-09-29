@@ -1,12 +1,15 @@
-# Mai pubblicare configurazioni locali o segreti
+# Mai pubblicare configurazioni locali, sorgenti o segreti
 .claude
 .vercel
 .impeccable
+.git
+.gitattributes
 .env
 .env.*
 *.env
 .gitignore
 .vercelignore
+src
 *.md
 *.ps1
 *.py

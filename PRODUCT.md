@@ -37,7 +37,7 @@ Balloon art is the specialty: custom set-ups (organic garlands, arches, columns,
 ## Capabilities and Constraints
 
 - The site has no backend: the contact form composes a WhatsApp message or an email; nothing is stored.
-- No real photos are available yet: gallery images are labelled placeholders to be replaced with the shop's own photos.
+- Photos: the hero comes from the Google Business listing; 12 photos of recent set-ups come from the shop's own Instagram posts (names blurred). The "Chi siamo" story is example text, flagged as such in the legal notes, to be replaced with the owner's real story.
 - Demo must stay out of search engines (noindex) until the owner approves.
 - Undecided: exact service list and prices, rental catalogue (tables, chairs, props) and whether entertainment (animazione) is in-house or via partners *(inferred from the brief, to verify)*.
 
@@ -50,7 +50,7 @@ Balloon art is the specialty: custom set-ups (organic garlands, arches, columns,
 ## Evidence on Hand
 
 - Rating 5/5 on 121 Google reviews (via kioku.it listing). Short paraphrased snippets from named reviewers exist on that listing; quote them only paraphrased and attributed, never invented.
-- No photos, logo, prices, team names beyond Martina, or years in business. Do not fabricate them.
+- Instagram bio and captions confirm: balloon art, set-ups "per ogni evento in tutta Italia", delivery, an Amazon shop, free quotes ("preventivo gratuito"), organic arches and balloon circles, foil numbers, balloon and shimmer walls, custom panels/backdrops/cylinders, confettata and sweet tables, glitter polystyrene name signs, decorative fake cakes. No logo file, prices or years in business: do not fabricate them.
 
 ## Product Principles
 
